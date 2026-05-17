@@ -39,8 +39,8 @@ export default function StudentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Quản lý học sinh</h2>
-          <p className="text-sm text-slate-500 mt-0.5">{users.filter(u => u.role === 'Student').length} học sinh</p>
+          <h2 className="text-2xl font-bold text-slate-800">Quản lý người dùng</h2>
+          <p className="text-sm text-slate-500 mt-0.5">{users.length} người dùng</p>
         </div>
         <button
           id="btn-add-user"

@@ -47,17 +47,13 @@ export default function DashboardPage() {
           const studentClasses = await studentService.getMyClasses();
           setMyClasses(studentClasses);
         } else if (user.role === 'Admin') {
-          const [classes, students] = await Promise.all([
-            classService.getAll(),
-            studentService.getAll(),
-          ]);
-          setClassCount(classes.length);
+          const students = await studentService.getAll();
+          setClassCount(null);
           setStudentCount(students.length);
         } else if (user.role === 'Teacher') {
-          // Teacher only gets their classes. They cannot access all students.
           const classes = await classService.getAll();
           setClassCount(classes.length);
-          setStudentCount(null); // Teacher won't see global student count
+          setStudentCount(null);
         }
       } catch {
         if (user.role === 'Student') {
@@ -73,20 +69,22 @@ export default function DashboardPage() {
     fetchStats();
   }, [user]);
 
-  const stats: StatCard[] = [
+  const stats: (StatCard & { roles: string[] })[] = [
+    {
+      label: 'Tổng người dùng',
+      value: studentCount ?? '–',
+      icon: Users,
+      color: 'from-rose-500 to-rose-600',
+      href: '/dashboard/students',
+      roles: ['Admin']
+    },
     {
       label: 'Tổng lớp học',
       value: classCount ?? '–',
       icon: BookOpen,
       color: 'from-red-500 to-red-600',
       href: '/dashboard/classes',
-    },
-    {
-      label: 'Tổng học sinh',
-      value: studentCount ?? '–',
-      icon: Users,
-      color: 'from-rose-500 to-rose-600',
-      href: '/dashboard/students',
+      roles: ['Teacher']
     },
     {
       label: 'Lịch hôm nay',
@@ -94,6 +92,7 @@ export default function DashboardPage() {
       icon: Calendar,
       color: 'from-orange-500 to-orange-600',
       href: '/dashboard/schedule',
+      roles: ['Teacher']
     },
     {
       label: 'Điểm danh',
@@ -101,6 +100,7 @@ export default function DashboardPage() {
       icon: ClipboardCheck,
       color: 'from-emerald-500 to-emerald-600',
       href: '/dashboard/attendance',
+      roles: ['Teacher']
     },
   ];
 
@@ -162,7 +162,7 @@ export default function DashboardPage() {
         <>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {stats
-              .filter(item => user?.role === 'Admin' || item.label !== 'Tổng học sinh')
+              .filter((item) => item.roles.includes(user?.role as string))
               .map(({ label, value, icon: Icon, color, href }) => (
               <Link key={label} href={href}>
                 <div className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 hover:shadow-lg hover:ring-red-200 transition-all duration-300 cursor-pointer">
@@ -186,10 +186,10 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold text-slate-800 mb-4">Truy cập nhanh</h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
-                { label: 'Tạo lớp mới', href: '/dashboard/classes', icon: BookOpen, roles: ['Admin', 'Teacher'] },
-                { label: 'Thêm học sinh', href: '/dashboard/students', icon: Users, roles: ['Admin'] },
-                { label: 'Xem lịch học', href: '/dashboard/schedule', icon: Calendar, roles: ['Admin', 'Teacher'] },
-                { label: 'Điểm danh hôm nay', href: '/dashboard/attendance', icon: ClipboardCheck, roles: ['Admin', 'Teacher'] },
+                { label: 'Tạo lớp mới', href: '/dashboard/classes', icon: BookOpen, roles: ['Teacher'] },
+                { label: 'Thêm người dùng', href: '/dashboard/students', icon: Users, roles: ['Admin'] },
+                { label: 'Xem lịch học', href: '/dashboard/schedule', icon: Calendar, roles: ['Teacher'] },
+                { label: 'Điểm danh hôm nay', href: '/dashboard/attendance', icon: ClipboardCheck, roles: ['Teacher'] },
               ]
                 .filter(item => item.roles.includes(user?.role as string))
                 .map(({ label, href, icon: Icon }) => (

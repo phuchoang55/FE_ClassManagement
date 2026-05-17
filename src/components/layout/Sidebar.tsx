@@ -18,10 +18,10 @@ import { useAuthStore } from '@/store/authStore';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home, roles: ['Admin', 'Teacher'] },
-  { href: '/dashboard/classes', label: 'Lớp học', icon: BookOpen, roles: ['Admin', 'Teacher'] },
-  { href: '/dashboard/students', label: 'Học sinh', icon: Users, roles: ['Admin'] },
-  { href: '/dashboard/schedule', label: 'Lịch học', icon: Calendar, roles: ['Admin', 'Teacher'] },
-  { href: '/dashboard/attendance', label: 'Điểm danh', icon: ClipboardCheck, roles: ['Admin', 'Teacher'] },
+  { href: '/dashboard/classes', label: 'Lớp học', icon: BookOpen, roles: ['Teacher'] },
+  { href: '/dashboard/students', label: 'Người dùng', icon: Users, roles: ['Admin'] },
+  { href: '/dashboard/schedule', label: 'Lịch học', icon: Calendar, roles: ['Teacher'] },
+  { href: '/dashboard/attendance', label: 'Điểm danh', icon: ClipboardCheck, roles: ['Teacher'] },
 ];
 
 export default function Sidebar() {
