@@ -86,12 +86,6 @@ npm run build
 npm start
 ```
 
-## 🔑 Tài khoản mặc định (Backend seed)
-
-| Email | Mật khẩu | Vai trò |
-|---|---|---|
-| nguyenhoang300281@gmail.com | 123456 | Admin |
-
 ## 🗺️ Tính năng
 
 - ✅ **Đăng nhập** với JWT authentication
