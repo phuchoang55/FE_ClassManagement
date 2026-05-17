@@ -3,15 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Calendar, Clock, Users } from 'lucide-react';
+import { ArrowLeft, BookOpen, Calendar, Clock, Users, UserPlus, Trash2 } from 'lucide-react';
 import { classService } from '@/services/classService';
 import { scheduleService } from '@/services/scheduleService';
 import { studentService } from '@/services/studentService';
-import { Class, ClassSchedule, ClassStudent } from '@/types';
+import { Class, ClassSchedule } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Alert from '@/components/ui/Alert';
 
-const dayLabels: Record<string, string> = {
+const dayLabels: Record<string | number, string> = {
   Sunday: 'Chủ nhật',
   Monday: 'Thứ Hai',
   Tuesday: 'Thứ Ba',
@@ -19,6 +19,13 @@ const dayLabels: Record<string, string> = {
   Thursday: 'Thứ Năm',
   Friday: 'Thứ Sáu',
   Saturday: 'Thứ Bảy',
+  0: 'Chủ nhật',
+  1: 'Thứ Hai',
+  2: 'Thứ Ba',
+  3: 'Thứ Tư',
+  4: 'Thứ Năm',
+  5: 'Thứ Sáu',
+  6: 'Thứ Bảy',
 };
 
 export default function ClassDetailPage() {
@@ -27,9 +34,11 @@ export default function ClassDetailPage() {
 
   const [cls, setCls] = useState<Class | null>(null);
   const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
-  const [students, setStudents] = useState<ClassStudent[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [emailInput, setEmailInput] = useState('');
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -50,6 +59,32 @@ export default function ClassDetailPage() {
     };
     fetchAll();
   }, [classId]);
+
+  const handleAddStudent = async () => {
+    if (!emailInput) return;
+    setError(''); setSuccess('');
+    try {
+      const res = await studentService.addToClass(classId, emailInput);
+      // Backend returns { message, student }
+      setStudents([...students, res.student || res]);
+      setEmailInput('');
+      setSuccess('Thêm học sinh thành công!');
+    } catch (e: any) {
+      setError(e?.response?.data || 'Thêm học sinh thất bại.');
+    }
+  };
+
+  const handleRemoveStudent = async (studentId: number) => {
+    if (!confirm('Xóa học sinh này khỏi lớp?')) return;
+    setError(''); setSuccess('');
+    try {
+      await studentService.removeFromClass(classId, studentId);
+      setStudents(students.filter(s => s.id !== studentId));
+      setSuccess('Đã xóa học sinh khỏi lớp.');
+    } catch {
+      setError('Xóa học sinh thất bại.');
+    }
+  };
 
   if (loading) return <LoadingSpinner />;
   if (!cls) return <Alert message="Không tìm thấy lớp học." variant="error" />;
@@ -79,6 +114,7 @@ export default function ClassDetailPage() {
       </div>
 
       {error && <Alert message={error} variant="error" />}
+      {success && <Alert message={success} variant="success" />}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Class info */}
@@ -146,31 +182,59 @@ export default function ClassDetailPage() {
 
         {/* Students */}
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 space-y-4">
-          <div className="flex items-center gap-2 text-red-600 font-semibold">
-            <Users size={18} />
-            Học sinh ({students.length})
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-red-600 font-semibold">
+              <Users size={18} />
+              Học sinh ({students.length})
+            </div>
           </div>
+
+          <div className="flex gap-2">
+            <input
+              type="email"
+              placeholder="Email học sinh..."
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
+            />
+            <button
+              onClick={handleAddStudent}
+              className="rounded-xl bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+            >
+              <UserPlus size={16} />
+            </button>
+          </div>
+
           {students.length === 0 ? (
-            <p className="text-sm text-slate-400">Chưa có học sinh nào.</p>
+            <p className="text-sm text-slate-400 mt-2">Chưa có học sinh nào.</p>
           ) : (
-            <ul className="space-y-2 max-h-48 overflow-y-auto">
+            <ul className="space-y-2 max-h-48 overflow-y-auto mt-2">
               {students.map((s) => (
-                <li key={s.studentId} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-400 to-rose-500 text-xs font-bold text-white shrink-0">
-                    {s.student?.fullName?.charAt(0) ?? 'S'}
+                <li key={s.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-400 to-rose-500 text-xs font-bold text-white shrink-0">
+                      {s.fullName?.charAt(0) ?? 'S'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-800">
+                        {s.fullName ?? `ID: ${s.id}`}
+                      </p>
+                      <p className="text-xs text-slate-500">{s.email}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">
-                      {s.student?.fullName ?? `ID: ${s.studentId}`}
-                    </p>
-                    <p className="text-xs text-slate-500">{s.student?.email}</p>
-                  </div>
+                  <button
+                    onClick={() => handleRemoveStudent(s.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Xóa khỏi lớp"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </li>
               ))}
             </ul>
           )}
           <Link href={`/dashboard/attendance?classId=${classId}`}>
-            <button className="w-full rounded-xl border border-emerald-200 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors mt-2">
+            <button className="w-full rounded-xl border border-emerald-200 py-2 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors mt-4">
               Xem điểm danh
             </button>
           </Link>

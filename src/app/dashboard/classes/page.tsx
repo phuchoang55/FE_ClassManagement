@@ -37,7 +37,7 @@ export default function ClassesPage() {
     }
   };
 
-  const isAdmin = user?.role === 'Admin';
+  const hasManageAccess = user?.role === 'Admin' || user?.role === 'Teacher';
 
   if (loading) return <LoadingSpinner />;
 
@@ -49,7 +49,7 @@ export default function ClassesPage() {
           <h2 className="text-2xl font-bold text-slate-800">Danh sách lớp học</h2>
           <p className="text-sm text-slate-500 mt-0.5">{classes.length} lớp học</p>
         </div>
-        {isAdmin && (
+        {hasManageAccess && (
           <Link href="/dashboard/classes/create">
             <button
               id="btn-create-class"
@@ -120,7 +120,7 @@ export default function ClassesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        {isAdmin && (
+                        {hasManageAccess && (
                           <>
                             <Link href={`/dashboard/classes/${cls.id}/edit`}>
                               <button className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors">

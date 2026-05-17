@@ -17,11 +17,11 @@ import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/dashboard/classes', label: 'Lớp học', icon: BookOpen },
-  { href: '/dashboard/students', label: 'Học sinh', icon: Users },
-  { href: '/dashboard/schedule', label: 'Lịch học', icon: Calendar },
-  { href: '/dashboard/attendance', label: 'Điểm danh', icon: ClipboardCheck },
+  { href: '/dashboard', label: 'Dashboard', icon: Home, roles: ['Admin', 'Teacher'] },
+  { href: '/dashboard/classes', label: 'Lớp học', icon: BookOpen, roles: ['Admin', 'Teacher'] },
+  { href: '/dashboard/students', label: 'Học sinh', icon: Users, roles: ['Admin'] },
+  { href: '/dashboard/schedule', label: 'Lịch học', icon: Calendar, roles: ['Admin', 'Teacher'] },
+  { href: '/dashboard/attendance', label: 'Điểm danh', icon: ClipboardCheck, roles: ['Admin', 'Teacher'] },
 ];
 
 export default function Sidebar() {
@@ -71,7 +71,9 @@ export default function Sidebar() {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-2">
-            {navItems.map(({ href, label, icon: Icon }) => {
+            {navItems
+              .filter(item => !item.roles || !user || item.roles.includes(user.role))
+              .map(({ href, label, icon: Icon }) => {
               const active = pathname === href || pathname.startsWith(href + '/');
               return (
                 <li key={href}>

@@ -10,14 +10,18 @@ interface Props {
 }
 
 export default function AuthGuard({ children, allowedRoles }: Props) {
-  const { isAuthenticated, user, initFromStorage } = useAuthStore();
+  const { isInitialized, isAuthenticated, user, initFromStorage } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
-    initFromStorage();
-  }, [initFromStorage]);
+    if (!isInitialized) {
+      initFromStorage();
+    }
+  }, [initFromStorage, isInitialized]);
 
   useEffect(() => {
+    if (!isInitialized) return;
+
     if (!isAuthenticated) {
       router.replace('/login');
       return;
@@ -25,8 +29,9 @@ export default function AuthGuard({ children, allowedRoles }: Props) {
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {
       router.replace('/unauthorized');
     }
-  }, [isAuthenticated, user, allowedRoles, router]);
+  }, [isInitialized, isAuthenticated, user, allowedRoles, router]);
 
+  if (!isInitialized) return null;
   if (!isAuthenticated) return null;
   if (allowedRoles && user && !allowedRoles.includes(user.role)) return null;
 

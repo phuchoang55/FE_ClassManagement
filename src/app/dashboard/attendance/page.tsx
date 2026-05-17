@@ -5,8 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { classService } from '@/services/classService';
 import { attendanceService } from '@/services/attendanceService';
+import { scheduleService } from '@/services/scheduleService';
 import { studentService } from '@/services/studentService';
-import { Class, Attendance, ClassStudent, AttendanceStatus } from '@/types';
+import { Class, Attendance, ClassSchedule, AttendanceStatus } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Alert from '@/components/ui/Alert';
 
@@ -19,6 +20,12 @@ const statusConfig: Record<
   'Not yet': { label: 'Chưa điểm danh', color: 'bg-amber-100 text-amber-700', icon: Clock },
 };
 
+const dayLabels: Record<string | number, string> = {
+  Sunday: 'Chủ nhật', Monday: 'Thứ Hai', Tuesday: 'Thứ Ba',
+  Wednesday: 'Thứ Tư', Thursday: 'Thứ Năm', Friday: 'Thứ Sáu', Saturday: 'Thứ Bảy',
+  0: 'Chủ nhật', 1: 'Thứ Hai', 2: 'Thứ Ba', 3: 'Thứ Tư', 4: 'Thứ Năm', 5: 'Thứ Sáu', 6: 'Thứ Bảy',
+};
+
 const inputCls = 'rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100';
 
 export default function AttendancePage() {
@@ -27,8 +34,10 @@ export default function AttendancePage() {
 
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>(initClassId ?? '');
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [students, setStudents] = useState<ClassStudent[]>([]);
+  const [selectedSessionKey, setSelectedSessionKey] = useState<string>('');
+  const [sessions, setSessions] = useState<{ date: string; scheduleId: number; label: string }[]>([]);
+  const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,16 +48,63 @@ export default function AttendancePage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedClass) { setStudents([]); setAttendance([]); return; }
+    if (!selectedClass) { setSchedules([]); setSessions([]); setSelectedSessionKey(''); return; }
+    scheduleService.getByClass(Number(selectedClass))
+      .then((scheds) => {
+        setSchedules(scheds);
+        const cls = classes.find(c => c.id === Number(selectedClass));
+        if (cls?.startDate && cls?.endDate && scheds.length > 0) {
+          const start = new Date(cls.startDate);
+          const end = new Date(cls.endDate);
+          const newSessions = [];
+          for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const dayOfWeek = d.getDay();
+            const matching = scheds.filter(s => {
+              let sDay = s.dayOfWeek as number | string;
+              if (typeof sDay === 'string') {
+                const map: Record<string, number> = { Sunday:0, Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6 };
+                sDay = map[sDay] ?? sDay;
+              }
+              return Number(sDay) === dayOfWeek;
+            });
+            for (const sch of matching) {
+              const year = d.getFullYear();
+              const month = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              const dateStr = `${year}-${month}-${day}`;
+              const vnDate = d.toLocaleDateString('vi-VN');
+              const dayName = dayLabels[sch.dayOfWeek] ?? sch.dayOfWeek;
+              newSessions.push({
+                date: dateStr,
+                scheduleId: sch.id,
+                label: `${vnDate} - ${dayName} (${sch.startTime.substring(0,5)} - ${sch.endTime.substring(0,5)})`
+              });
+            }
+          }
+          newSessions.reverse();
+          setSessions(newSessions);
+          if (newSessions.length > 0) setSelectedSessionKey(`${newSessions[0].date}|${newSessions[0].scheduleId}`);
+          else setSelectedSessionKey('');
+        } else {
+          setSessions([]);
+          setSelectedSessionKey('');
+        }
+      })
+      .catch(() => {});
+  }, [selectedClass, classes]);
+
+  useEffect(() => {
+    const [selectedDate, selectedScheduleId] = selectedSessionKey ? selectedSessionKey.split('|') : ['', ''];
+    if (!selectedClass || !selectedDate) { setStudents([]); setAttendance([]); return; }
     setLoading(true);
     Promise.all([
       studentService.getByClass(Number(selectedClass)),
-      attendanceService.getByClassAndDate(Number(selectedClass), selectedDate),
+      attendanceService.getByClassAndDate(Number(selectedClass), selectedDate, selectedScheduleId ? Number(selectedScheduleId) : undefined),
     ])
       .then(([studs, atts]) => { setStudents(studs); setAttendance(atts); })
       .catch(() => setError('Không thể tải dữ liệu điểm danh.'))
       .finally(() => setLoading(false));
-  }, [selectedClass, selectedDate]);
+  }, [selectedClass, selectedSessionKey]);
 
   const getStatus = (studentId: number): AttendanceStatus => {
     const found = attendance.find((a) => a.studentId === studentId);
@@ -59,13 +115,24 @@ export default function AttendancePage() {
     attendance.find((a) => a.studentId === studentId)?.id;
 
   const handleUpdateStatus = async (studentId: number, status: AttendanceStatus) => {
-    const attId = getAttendanceId(studentId);
+    if (!selectedSessionKey) return;
+    const [selectedDate, selectedScheduleId] = selectedSessionKey.split('|');
     setError(''); setSuccess('');
     try {
-      if (attId) {
-        await attendanceService.update(attId, { status });
-        setAttendance((prev) => prev.map((a) => (a.id === attId ? { ...a, status } : a)));
-      }
+      await attendanceService.markBulk(
+        Number(selectedClass), 
+        selectedDate, 
+        [{ studentId, status }], 
+        selectedScheduleId ? Number(selectedScheduleId) : undefined
+      );
+      
+      setAttendance((prev) => {
+        const exists = prev.find((a) => a.studentId === studentId);
+        if (exists) {
+          return prev.map((a) => (a.studentId === studentId ? { ...a, status } : a));
+        }
+        return [...prev, { id: Date.now(), classId: Number(selectedClass), studentId, date: selectedDate, status } as any];
+      });
       setSuccess('Đã cập nhật điểm danh.');
     } catch {
       setError('Cập nhật điểm danh thất bại.');
@@ -101,15 +168,24 @@ export default function AttendancePage() {
             ))}
           </select>
         </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">Ngày</label>
-          <input
-            id="attendance-date"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className={inputCls}
-          />
+        <div className="flex-1 min-w-64">
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">Buổi học</label>
+          <select
+            value={selectedSessionKey}
+            onChange={(e) => setSelectedSessionKey(e.target.value)}
+            className={`w-full ${inputCls}`}
+            disabled={!selectedClass || sessions.length === 0}
+          >
+            {sessions.length === 0 ? (
+              <option value="">{selectedClass ? '-- Không có buổi học nào --' : '-- Chọn lớp trước --'}</option>
+            ) : (
+              sessions.map((s) => (
+                <option key={`${s.date}|${s.scheduleId}`} value={`${s.date}|${s.scheduleId}`}>
+                  {s.label}
+                </option>
+              ))
+            )}
+          </select>
         </div>
       </div>
 
@@ -154,22 +230,22 @@ export default function AttendancePage() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {students.map((s) => {
-                      const status = getStatus(s.studentId);
+                      const status = getStatus(s.id);
                       const cfg = statusConfig[status];
                       const Icon = cfg.icon;
                       return (
-                        <tr key={s.studentId} className="hover:bg-slate-50 transition-colors">
+                        <tr key={s.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-400 to-rose-500 text-sm font-bold text-white">
-                                {s.student?.fullName?.charAt(0) ?? 'S'}
+                                {s.fullName?.charAt(0) ?? 'S'}
                               </div>
                               <span className="font-medium text-slate-800">
-                                {s.student?.fullName ?? `ID: ${s.studentId}`}
+                                {s.fullName ?? `ID: ${s.id}`}
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-500">{s.student?.email ?? '–'}</td>
+                          <td className="px-6 py-4 text-sm text-slate-500">{s.email ?? '–'}</td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${cfg.color}`}>
                               <Icon size={12} />
@@ -181,8 +257,8 @@ export default function AttendancePage() {
                               {(['Present', 'Absent'] as AttendanceStatus[]).map((st) => (
                                 <button
                                   key={st}
-                                  onClick={() => handleUpdateStatus(s.studentId, st)}
-                                  disabled={status === st || !getAttendanceId(s.studentId)}
+                                  onClick={() => handleUpdateStatus(s.id, st)}
+                                  disabled={status === st}
                                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
                                     status === st
                                       ? st === 'Present'

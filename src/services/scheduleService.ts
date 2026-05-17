@@ -3,13 +3,14 @@ import { ClassSchedule, CreateScheduleRequest } from '@/types';
 
 export const scheduleService = {
   getByClass: (classId: number) =>
-    api.get<ClassSchedule[]>(`/schedule/class/${classId}`).then((r) => r.data),
+    api.get<any[]>(`/classes/${classId}/schedules`).then((r) => r.data),
 
-  create: (data: CreateScheduleRequest) =>
-    api.post<ClassSchedule>('/schedule', data).then((r) => r.data),
+  create: (classId: number, data: any) =>
+    api.post<any>(`/classes/${classId}/schedules`, data).then((r) => r.data),
 
-  update: (id: number, data: Partial<CreateScheduleRequest>) =>
-    api.put<ClassSchedule>(`/schedule/${id}`, data).then((r) => r.data),
+  update: (classId: number, scheduleId: number, data: any) =>
+    api.put<any>(`/classes/${classId}/schedules/${scheduleId}`, data).then((r) => r.data),
 
-  delete: (id: number) => api.delete(`/schedule/${id}`),
+  delete: (classId: number, scheduleId: number) => 
+    api.delete(`/classes/${classId}/schedules/${scheduleId}`),
 };

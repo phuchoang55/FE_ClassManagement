@@ -16,7 +16,6 @@ interface FormData {
   description?: string;
   startDate?: string;
   endDate?: string;
-  teacherId: string;
 }
 
 export default function EditClassPage() {
@@ -35,15 +34,13 @@ export default function EditClassPage() {
   } = useForm<FormData>();
 
   useEffect(() => {
-    Promise.all([classService.getById(classId), studentService.getAll()])
-      .then(([cls, users]) => {
-        setTeachers(users.filter((u) => u.role === 'Teacher' || u.role === 'Admin'));
+    classService.getById(classId)
+      .then((cls) => {
         reset({
           name: cls.name,
           description: cls.description ?? '',
           startDate: cls.startDate ? cls.startDate.split('T')[0] : '',
           endDate: cls.endDate ? cls.endDate.split('T')[0] : '',
-          teacherId: String(cls.teacherId),
         });
       })
       .catch(() => setError('Không thể tải thông tin lớp học.'))
@@ -53,7 +50,6 @@ export default function EditClassPage() {
   const validate = (data: FormData): boolean => {
     const errs: Partial<Record<keyof FormData, string>> = {};
     if (!data.name.trim()) errs.name = 'Tên lớp không được trống';
-    if (!data.teacherId || data.teacherId === '') errs.teacherId = 'Vui lòng chọn giáo viên';
     setValidationErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -62,7 +58,7 @@ export default function EditClassPage() {
     if (!validate(data)) return;
     setError('');
     try {
-      await classService.update(classId, { ...data, teacherId: Number(data.teacherId) });
+      await classService.update(classId, data as any);
       window.location.href = '/dashboard/classes';
     } catch {
       setError('Cập nhật thất bại. Vui lòng thử lại.');
@@ -110,16 +106,7 @@ export default function EditClassPage() {
             </div>
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">Giáo viên *</label>
-            <select {...register('teacherId')} className={inputCls}>
-              <option value="">-- Chọn giáo viên --</option>
-              {teachers.map((t) => (
-                <option key={t.id} value={t.id}>{t.fullName} ({t.email})</option>
-              ))}
-            </select>
-            {validationErrors.teacherId && <p className="mt-1 text-xs text-red-500">{validationErrors.teacherId}</p>}
-          </div>
+
 
           <div className="flex justify-end gap-3 pt-2">
             <Link href="/dashboard/classes">

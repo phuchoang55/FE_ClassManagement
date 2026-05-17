@@ -19,7 +19,21 @@ const DAYS: { value: DayOfWeek; label: string }[] = [
   { value: 'Sunday', label: 'Chủ nhật' },
 ];
 
-const dayLabel = (d: string) => DAYS.find((x) => x.value === d)?.label ?? d;
+const dayLabel = (d: string | number) => {
+  const numToDay: Record<number, string> = {
+    0: 'Chủ nhật',
+    1: 'Thứ Hai',
+    2: 'Thứ Ba',
+    3: 'Thứ Tư',
+    4: 'Thứ Năm',
+    5: 'Thứ Sáu',
+    6: 'Thứ Bảy',
+  };
+  if (typeof d === 'number' || !isNaN(Number(d))) {
+    return numToDay[Number(d)] ?? d;
+  }
+  return DAYS.find((x) => x.value === d)?.label ?? d;
+};
 
 const inputCls = 'w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100';
 
@@ -58,9 +72,9 @@ export default function SchedulePage() {
     if (!selectedClass) return;
     setError(''); setSuccess('');
     try {
-      const newSchedule = await scheduleService.create({
-        classId: Number(selectedClass),
-        ...form,
+      const newSchedule = await scheduleService.create(Number(selectedClass), {
+        dayOfWeek: form.dayOfWeek,
+        room: form.room,
         startTime: form.startTime + ':00',
         endTime: form.endTime + ':00',
       });
@@ -74,7 +88,7 @@ export default function SchedulePage() {
   const handleDelete = async (id: number) => {
     if (!confirm('Xóa lịch học này?')) return;
     try {
-      await scheduleService.delete(id);
+      await scheduleService.delete(Number(selectedClass), id);
       setSchedules((prev) => prev.filter((s) => s.id !== id));
     } catch {
       setError('Xóa lịch học thất bại.');

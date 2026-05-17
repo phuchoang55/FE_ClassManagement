@@ -14,7 +14,6 @@ interface FormData {
   description?: string;
   startDate?: string;
   endDate?: string;
-  teacherId: string;
 }
 
 export default function CreateClassPage() {
@@ -29,16 +28,12 @@ export default function CreateClassPage() {
   } = useForm<FormData>();
 
   useEffect(() => {
-    studentService
-      .getAll()
-      .then((users) => setTeachers(users.filter((u) => u.role === 'Teacher' || u.role === 'Admin')))
-      .catch(() => {});
+    // No need to fetch teachers since the backend assigns the class to the current logged-in teacher
   }, []);
 
   const validate = (data: FormData): boolean => {
     const errs: Partial<Record<keyof FormData, string>> = {};
     if (!data.name.trim()) errs.name = 'Tên lớp không được trống';
-    if (!data.teacherId || data.teacherId === '') errs.teacherId = 'Vui lòng chọn giáo viên';
     setValidationErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -49,7 +44,7 @@ export default function CreateClassPage() {
     if (!validate(data)) return;
     setError('');
     try {
-      await classService.create({ ...data, teacherId: Number(data.teacherId) });
+      await classService.create(data as any);
       router.push('/dashboard/classes');
     } catch {
       setError('Tạo lớp học thất bại. Vui lòng thử lại.');
@@ -103,18 +98,7 @@ export default function CreateClassPage() {
             </div>
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
-              Giáo viên <span className="text-red-500">*</span>
-            </label>
-            <select id="class-teacher" {...register('teacherId')} className={inputCls}>
-              <option value="">-- Chọn giáo viên --</option>
-              {teachers.map((t) => (
-                <option key={t.id} value={t.id}>{t.fullName} ({t.email})</option>
-              ))}
-            </select>
-            {validationErrors.teacherId && <p className="mt-1 text-xs text-red-500">{validationErrors.teacherId}</p>}
-          </div>
+
 
           <div className="flex justify-end gap-3 pt-2">
             <Link href="/dashboard/classes">

@@ -1,14 +1,23 @@
 'use client';
 
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   title?: string;
 }
 
 export default function Header({ title }: Props) {
-  const { user } = useAuthStore();
+  const { user, clearAuth } = useAuthStore();
+  const router = useRouter();
+  
+  const isStudent = user?.role === 'Student';
+
+  const handleLogout = () => {
+    clearAuth();
+    router.replace('/login');
+  };
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-sm px-6 sticky top-0 z-10">
@@ -34,11 +43,20 @@ export default function Header({ title }: Props) {
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
         </button>
 
-        {/* Avatar */}
-        <div className="flex items-center gap-2">
+        {/* Avatar & Logout */}
+        <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-sm font-bold text-white shadow-md">
             {user?.fullName?.charAt(0) ?? 'U'}
           </div>
+          {isStudent && (
+            <button 
+              onClick={handleLogout}
+              className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+              title="Đăng xuất"
+            >
+              <LogOut size={18} />
+            </button>
+          )}
         </div>
       </div>
     </header>
