@@ -71,7 +71,7 @@ export default function ClassDetailPage() {
         </div>
         <div className="ml-auto">
           <Link href={`/dashboard/classes/${classId}/edit`}>
-            <button className="rounded-xl border border-indigo-200 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors">
+            <button className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
               Chỉnh sửa
             </button>
           </Link>
@@ -83,7 +83,7 @@ export default function ClassDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Class info */}
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 space-y-4">
-          <div className="flex items-center gap-2 text-indigo-600 font-semibold">
+          <div className="flex items-center gap-2 text-red-600 font-semibold">
             <BookOpen size={18} />
             Thông tin lớp học
           </div>
@@ -115,11 +115,9 @@ export default function ClassDetailPage() {
 
         {/* Schedules */}
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
-              <Calendar size={18} />
-              Lịch học ({schedules.length})
-            </div>
+          <div className="flex items-center gap-2 text-red-600 font-semibold">
+            <Calendar size={18} />
+            Lịch học ({schedules.length})
           </div>
           {schedules.length === 0 ? (
             <p className="text-sm text-slate-400">Chưa có lịch học nào.</p>
@@ -140,7 +138,7 @@ export default function ClassDetailPage() {
             </ul>
           )}
           <Link href={`/dashboard/schedule?classId=${classId}`}>
-            <button className="w-full rounded-xl border border-indigo-200 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-colors mt-2">
+            <button className="w-full rounded-xl border border-red-200 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-2">
               Quản lý lịch học
             </button>
           </Link>
@@ -148,22 +146,17 @@ export default function ClassDetailPage() {
 
         {/* Students */}
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-indigo-600 font-semibold">
-              <Users size={18} />
-              Học sinh ({students.length})
-            </div>
+          <div className="flex items-center gap-2 text-red-600 font-semibold">
+            <Users size={18} />
+            Học sinh ({students.length})
           </div>
           {students.length === 0 ? (
             <p className="text-sm text-slate-400">Chưa có học sinh nào.</p>
           ) : (
             <ul className="space-y-2 max-h-48 overflow-y-auto">
               {students.map((s) => (
-                <li
-                  key={s.studentId}
-                  className="flex items-center gap-3 rounded-xl bg-slate-50 p-3"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-xs font-bold text-white shrink-0">
+                <li key={s.studentId} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-400 to-rose-500 text-xs font-bold text-white shrink-0">
                     {s.student?.fullName?.charAt(0) ?? 'S'}
                   </div>
                   <div>

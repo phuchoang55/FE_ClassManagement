@@ -24,19 +24,19 @@ export default function Header({ title }: Props) {
           <input
             type="text"
             placeholder="Tìm kiếm..."
-            className="w-64 rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="w-64 rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm placeholder-slate-400 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
           />
         </div>
 
         {/* Notification */}
         <button className="relative rounded-xl p-2 hover:bg-slate-100 transition-colors">
           <Bell size={20} className="text-slate-600" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-500" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
         </button>
 
         {/* Avatar */}
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white shadow-md">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-sm font-bold text-white shadow-md">
             {user?.fullName?.charAt(0) ?? 'U'}
           </div>
         </div>

@@ -3,19 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Eye, EyeOff, GraduationCap, Loader2 } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { useAuthStore } from '@/store/authStore';
 import Alert from '@/components/ui/Alert';
 
-const schema = z.object({
-  email: z.string().email('Email không hợp lệ'),
-  password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
-});
-
-type FormData = z.infer<typeof schema>;
+interface FormData {
+  email: string;
+  password: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,8 +22,8 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+    formState: { isSubmitting },
+  } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
     setError('');
@@ -43,7 +39,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left decorative panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 flex-col items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-red-600 via-rose-600 to-red-800 flex-col items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           {[...Array(6)].map((_, i) => (
             <div
@@ -67,7 +63,7 @@ export default function LoginPage() {
             </div>
           </div>
           <h2 className="text-4xl font-bold mb-4">ClassManagement</h2>
-          <p className="text-indigo-200 text-lg max-w-xs mx-auto leading-relaxed">
+          <p className="text-red-200 text-lg max-w-xs mx-auto leading-relaxed">
             Hệ thống quản lý lớp học, lịch học và điểm danh toàn diện
           </p>
           <div className="mt-10 grid grid-cols-3 gap-6 text-center">
@@ -78,7 +74,7 @@ export default function LoginPage() {
             ].map((stat) => (
               <div key={stat.label} className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
                 <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-xs text-indigo-200 mt-1">{stat.label}</p>
+                <p className="text-xs text-red-200 mt-1">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -90,8 +86,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             <div className="lg:hidden mb-4 flex justify-center">
-              <div className="rounded-2xl bg-indigo-100 p-4">
-                <GraduationCap size={40} className="text-indigo-600" />
+              <div className="rounded-2xl bg-red-100 p-4">
+                <GraduationCap size={40} className="text-red-600" />
               </div>
             </div>
             <h1 className="text-3xl font-bold text-slate-900">Đăng nhập</h1>
@@ -115,11 +111,8 @@ export default function LoginPage() {
                 type="email"
                 {...register('email')}
                 placeholder="admin@example.com"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm transition focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
               />
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-              )}
             </div>
 
             {/* Password */}
@@ -133,7 +126,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   placeholder="••••••••"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-11 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-11 text-sm transition focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100"
                 />
                 <button
                   type="button"
@@ -143,16 +136,13 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
-              )}
             </div>
 
             <button
               id="btn-login"
               type="submit"
               disabled={isSubmitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-700 hover:to-purple-700 disabled:opacity-70"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-200 transition hover:from-red-700 hover:to-rose-700 disabled:opacity-70"
             >
               {isSubmitting ? (
                 <>

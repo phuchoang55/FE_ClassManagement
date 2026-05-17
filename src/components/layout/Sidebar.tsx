@@ -54,9 +54,9 @@ export default function Sidebar() {
         <div className="flex items-center justify-between border-b border-slate-700 px-4 py-5">
           {open && (
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-7 w-7 text-indigo-400" />
+              <GraduationCap className="h-7 w-7 text-red-400" />
               <span className="text-lg font-bold tracking-tight">
-                Class<span className="text-indigo-400">Mgmt</span>
+                Class<span className="text-red-400">Mgmt</span>
               </span>
             </div>
           )}
@@ -79,7 +79,7 @@ export default function Sidebar() {
                     href={href}
                     className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                       active
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                        ? 'bg-red-600 text-white shadow-lg shadow-red-500/30'
                         : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                     }`}
                   >
@@ -100,7 +100,7 @@ export default function Sidebar() {
                 {user.fullName}
               </p>
               <p className="text-xs text-slate-400 truncate">{user.email}</p>
-              <span className="mt-1 inline-block rounded-full bg-indigo-500/20 px-2 py-0.5 text-xs text-indigo-300">
+              <span className="mt-1 inline-block rounded-full bg-red-500/20 px-2 py-0.5 text-xs text-red-300">
                 {user.role}
               </span>
             </div>

@@ -53,7 +53,7 @@ export default function ClassesPage() {
           <Link href="/dashboard/classes/create">
             <button
               id="btn-create-class"
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200 hover:from-indigo-700 hover:to-purple-700 transition-all"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-200 hover:from-red-700 hover:to-rose-700 transition-all"
             >
               <Plus size={18} />
               Tạo lớp mới
@@ -94,7 +94,7 @@ export default function ClassesPage() {
                   <tr key={cls.id} className="hover:bg-slate-50 transition-colors group">
                     <td className="px-6 py-4">
                       <Link href={`/dashboard/classes/${cls.id}`}>
-                        <div className="flex items-center gap-2 font-semibold text-indigo-600 hover:text-indigo-700 cursor-pointer">
+                        <div className="flex items-center gap-2 font-semibold text-red-600 hover:text-red-700 cursor-pointer">
                           {cls.name}
                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
@@ -123,7 +123,7 @@ export default function ClassesPage() {
                         {isAdmin && (
                           <>
                             <Link href={`/dashboard/classes/${cls.id}/edit`}>
-                              <button className="rounded-lg p-1.5 text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                              <button className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <Pencil size={16} />
                               </button>
                             </Link>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { classService } from '@/services/classService';
@@ -22,7 +22,6 @@ interface FormData {
 export default function EditClassPage() {
   const { id } = useParams<{ id: string }>();
   const classId = Number(id);
-  const router = useRouter();
   const [teachers, setTeachers] = useState<User[]>([]);
   const [error, setError] = useState('');
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -63,15 +62,14 @@ export default function EditClassPage() {
     if (!validate(data)) return;
     setError('');
     try {
-      await classService.update(classId, {
-        ...data,
-        teacherId: Number(data.teacherId),
-      });
-      router.push('/dashboard/classes');
+      await classService.update(classId, { ...data, teacherId: Number(data.teacherId) });
+      window.location.href = '/dashboard/classes';
     } catch {
       setError('Cập nhật thất bại. Vui lòng thử lại.');
     }
   };
+
+  const inputCls = 'w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100';
 
   if (fetchLoading) return <LoadingSpinner />;
 
@@ -92,75 +90,47 @@ export default function EditClassPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">Tên lớp *</label>
-            <input
-              id="edit-class-name"
-              {...register('name')}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-            />
-            {validationErrors.name && (
-              <p className="mt-1 text-xs text-red-500">{validationErrors.name}</p>
-            )}
+            <input id="edit-class-name" {...register('name')} className={inputCls} />
+            {validationErrors.name && <p className="mt-1 text-xs text-red-500">{validationErrors.name}</p>}
           </div>
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">Mô tả</label>
-            <textarea
-              {...register('description')}
-              rows={3}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 resize-none"
-            />
+            <textarea {...register('description')} rows={3} className={`${inputCls} resize-none`} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">Ngày bắt đầu</label>
-              <input
-                type="date"
-                {...register('startDate')}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              />
+              <input type="date" {...register('startDate')} className={inputCls} />
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-slate-700">Ngày kết thúc</label>
-              <input
-                type="date"
-                {...register('endDate')}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              />
+              <input type="date" {...register('endDate')} className={inputCls} />
             </div>
           </div>
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">Giáo viên *</label>
-            <select
-              {...register('teacherId')}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-            >
+            <select {...register('teacherId')} className={inputCls}>
               <option value="">-- Chọn giáo viên --</option>
               {teachers.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.fullName} ({t.email})
-                </option>
+                <option key={t.id} value={t.id}>{t.fullName} ({t.email})</option>
               ))}
             </select>
-            {validationErrors.teacherId && (
-              <p className="mt-1 text-xs text-red-500">{validationErrors.teacherId}</p>
-            )}
+            {validationErrors.teacherId && <p className="mt-1 text-xs text-red-500">{validationErrors.teacherId}</p>}
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
             <Link href="/dashboard/classes">
-              <button
-                type="button"
-                className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-              >
+              <button type="button" className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
                 Hủy
               </button>
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200 hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-70"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-200 hover:from-red-700 hover:to-rose-700 transition-all disabled:opacity-70"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               Lưu thay đổi

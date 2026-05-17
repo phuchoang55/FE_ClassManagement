@@ -9,7 +9,7 @@ import Alert from '@/components/ui/Alert';
 
 const roleBadge: Record<string, string> = {
   Admin: 'bg-red-100 text-red-700',
-  Teacher: 'bg-indigo-100 text-indigo-700',
+  Teacher: 'bg-rose-100 text-rose-700',
   Student: 'bg-emerald-100 text-emerald-700',
 };
 
@@ -44,7 +44,7 @@ export default function StudentsPage() {
         </div>
         <button
           id="btn-add-user"
-          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-200 hover:from-indigo-700 hover:to-purple-700 transition-all"
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-200 hover:from-red-700 hover:to-rose-700 transition-all"
         >
           <UserPlus size={18} />
           Thêm người dùng
@@ -62,7 +62,7 @@ export default function StudentsPage() {
           placeholder="Tìm kiếm theo tên hoặc email..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-md rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          className="w-full max-w-md rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm placeholder-slate-400 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
         />
       </div>
 
@@ -71,10 +71,10 @@ export default function StudentsPage() {
         {filtered.map((user) => (
           <div
             key={user.id}
-            className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 hover:shadow-md hover:ring-indigo-200 transition-all duration-200"
+            className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 hover:shadow-md hover:ring-red-200 transition-all duration-200"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 text-lg font-bold text-white shadow-md">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-rose-500 text-lg font-bold text-white shadow-md">
                 {user.fullName.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
@@ -87,15 +87,10 @@ export default function StudentsPage() {
                 roleBadge[user.role] ?? 'bg-slate-100 text-slate-600'
               }`}
             >
-              {user.role === 'Admin'
-                ? 'Quản trị viên'
-                : user.role === 'Teacher'
-                ? 'Giáo viên'
-                : 'Học sinh'}
+              {user.role === 'Admin' ? 'Quản trị viên' : user.role === 'Teacher' ? 'Giáo viên' : 'Học sinh'}
             </span>
           </div>
         ))}
-
         {filtered.length === 0 && (
           <div className="col-span-full py-12 text-center text-slate-400">
             Không tìm thấy người dùng nào.

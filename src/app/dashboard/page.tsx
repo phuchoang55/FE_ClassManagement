@@ -56,21 +56,21 @@ export default function DashboardPage() {
       label: 'Tổng lớp học',
       value: classCount ?? '–',
       icon: BookOpen,
-      color: 'from-indigo-500 to-indigo-600',
+      color: 'from-red-500 to-red-600',
       href: '/dashboard/classes',
     },
     {
       label: 'Tổng học sinh',
       value: studentCount ?? '–',
       icon: Users,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-rose-500 to-rose-600',
       href: '/dashboard/students',
     },
     {
       label: 'Lịch hôm nay',
       value: 'Xem',
       icon: Calendar,
-      color: 'from-cyan-500 to-cyan-600',
+      color: 'from-orange-500 to-orange-600',
       href: '/dashboard/schedule',
     },
     {
@@ -87,12 +87,12 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome */}
-      <div className="rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 p-8 text-white shadow-xl shadow-indigo-200">
+      <div className="rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-700 p-8 text-white shadow-xl shadow-red-200">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-indigo-200 text-sm mb-1">Chào mừng trở lại 👋</p>
+            <p className="text-red-200 text-sm mb-1">Chào mừng trở lại 👋</p>
             <h2 className="text-3xl font-bold">{user?.fullName}</h2>
-            <p className="text-indigo-200 mt-1">
+            <p className="text-red-200 mt-1">
               Vai trò: <span className="text-white font-semibold">{user?.role}</span>
             </p>
           </div>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map(({ label, value, icon: Icon, color, href }) => (
           <Link key={label} href={href}>
-            <div className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 hover:shadow-lg hover:ring-indigo-200 transition-all duration-300 cursor-pointer">
+            <div className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 hover:shadow-lg hover:ring-red-200 transition-all duration-300 cursor-pointer">
               <div
                 className={`absolute -right-4 -top-4 h-20 w-20 rounded-full bg-gradient-to-br ${color} opacity-10 transition-all group-hover:opacity-20`}
               />
@@ -133,8 +133,8 @@ export default function DashboardPage() {
             { label: 'Điểm danh hôm nay', href: '/dashboard/attendance', icon: ClipboardCheck },
           ].map(({ label, href, icon: Icon }) => (
             <Link key={label} href={href}>
-              <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 p-4 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-200 cursor-pointer text-center">
-                <Icon size={20} className="text-indigo-500" />
+              <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 p-4 hover:bg-red-50 hover:border-red-200 transition-all duration-200 cursor-pointer text-center">
+                <Icon size={20} className="text-red-500" />
                 <span className="text-xs font-medium text-slate-600">{label}</span>
               </div>
             </Link>

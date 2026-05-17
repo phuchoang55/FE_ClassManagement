@@ -19,15 +19,15 @@ const statusConfig: Record<
   'Not yet': { label: 'Chưa điểm danh', color: 'bg-amber-100 text-amber-700', icon: Clock },
 };
 
+const inputCls = 'rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100';
+
 export default function AttendancePage() {
   const searchParams = useSearchParams();
   const initClassId = searchParams.get('classId');
 
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>(initClassId ?? '');
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [students, setStudents] = useState<ClassStudent[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,20 +39,13 @@ export default function AttendancePage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedClass) {
-      setStudents([]);
-      setAttendance([]);
-      return;
-    }
+    if (!selectedClass) { setStudents([]); setAttendance([]); return; }
     setLoading(true);
     Promise.all([
       studentService.getByClass(Number(selectedClass)),
       attendanceService.getByClassAndDate(Number(selectedClass), selectedDate),
     ])
-      .then(([studs, atts]) => {
-        setStudents(studs);
-        setAttendance(atts);
-      })
+      .then(([studs, atts]) => { setStudents(studs); setAttendance(atts); })
       .catch(() => setError('Không thể tải dữ liệu điểm danh.'))
       .finally(() => setLoading(false));
   }, [selectedClass, selectedDate]);
@@ -62,20 +55,16 @@ export default function AttendancePage() {
     return found?.status ?? 'Not yet';
   };
 
-  const getAttendanceId = (studentId: number): number | undefined => {
-    return attendance.find((a) => a.studentId === studentId)?.id;
-  };
+  const getAttendanceId = (studentId: number): number | undefined =>
+    attendance.find((a) => a.studentId === studentId)?.id;
 
   const handleUpdateStatus = async (studentId: number, status: AttendanceStatus) => {
     const attId = getAttendanceId(studentId);
-    setError('');
-    setSuccess('');
+    setError(''); setSuccess('');
     try {
       if (attId) {
         await attendanceService.update(attId, { status });
-        setAttendance((prev) =>
-          prev.map((a) => (a.id === attId ? { ...a, status } : a))
-        );
+        setAttendance((prev) => prev.map((a) => (a.id === attId ? { ...a, status } : a)));
       }
       setSuccess('Đã cập nhật điểm danh.');
     } catch {
@@ -104,13 +93,11 @@ export default function AttendancePage() {
             id="attendance-class-select"
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className={`w-full ${inputCls}`}
           >
             <option value="">-- Chọn lớp --</option>
             {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
         </div>
@@ -121,7 +108,7 @@ export default function AttendancePage() {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className={inputCls}
           />
         </div>
       </div>
@@ -159,10 +146,7 @@ export default function AttendancePage() {
                   <thead className="bg-slate-50">
                     <tr>
                       {['Học sinh', 'Email', 'Trạng thái', 'Cập nhật'].map((h) => (
-                        <th
-                          key={h}
-                          className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500"
-                        >
+                        <th key={h} className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                           {h}
                         </th>
                       ))}
@@ -177,7 +161,7 @@ export default function AttendancePage() {
                         <tr key={s.studentId} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-sm font-bold text-white">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-400 to-rose-500 text-sm font-bold text-white">
                                 {s.student?.fullName?.charAt(0) ?? 'S'}
                               </div>
                               <span className="font-medium text-slate-800">
@@ -185,13 +169,9 @@ export default function AttendancePage() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-500">
-                            {s.student?.email ?? '–'}
-                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-500">{s.student?.email ?? '–'}</td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${cfg.color}`}
-                            >
+                            <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${cfg.color}`}>
                               <Icon size={12} />
                               {cfg.label}
                             </span>
